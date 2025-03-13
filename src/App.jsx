@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./Index.css";
 import Search from "./components/Search";
 
@@ -6,13 +6,15 @@ const API_BASE_URL = "https://api.themoviedb.org/3";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
+console.log("API Key:", API_KEY);
+
 const API_OPTIONS = {
-  method: 'GET',
+  method: "GET",
   headers: {
-    accept: 'application/json',
-    Authorization: `Bearer ${API_KEY}`
-  }
-}
+    accept: "application/json",
+    Authorization: `Bearer ${API_KEY}`,
+  },
+};
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,32 +23,32 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchMovies = async () => {
-
     setIsLoading(true);
-    setErrorMessage('');
+    setErrorMessage("");
 
     try {
-      const endpoint  = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
       const response = await fetch(endpoint, API_OPTIONS);
 
-      if(!response.ok) {
-        throw new Error('Failed to fetch movies');
+      if (!response.ok) {
+        throw new Error("Failed to fetch movies");
       }
 
       const data = await response.json();
 
-      if(data.Response  === 'False') {
-        setErrorMessage(data.Error) || 'Failed to fetch movies';
+      if (data.Response === "False") {
+        setErrorMessage(data.Error) || "Failed to fetch movies";
         setMovieList([]);
         return;
       }
 
       setMovieList(data.results || []);
-
-    }catch (error) {
+    } catch (error) {
       console.error(`Error fetching movies: ${error}`);
+      setErrorMessage("Failed to fetch movies");
     }
-  }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     fetchMovies();
@@ -55,8 +57,8 @@ function App() {
   return (
     <main>
       <div className="pattern" />
-      <div className="wrapper">
-        <header>
+      <div className="wrapper height-full">
+        <header className="mt-[-50px]">
           <img src="./hero.png" alt="Hero Banner" />
           <h1>
             Find <span className="text-gradient">Movies</span> You'll Enjoy
@@ -67,7 +69,19 @@ function App() {
 
         <section className="all-movies">
           <h2>All Movies</h2>
-          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+          {isLoading ? (
+            <p className="text-white">Loading...</p>
+          ) : errorMessage ? (
+            <p className="text-red-500">{errorMessage}</p>
+          ) : (
+            <ul>
+              {movieList.map((movie) => (
+                <p key={movie.id} className="text-white">
+                  {movie.title}
+                </p>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
     </main>
